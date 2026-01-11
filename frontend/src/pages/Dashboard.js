@@ -103,15 +103,15 @@ const Dashboard = ({ user, logout }) => {
               <div>
                 <p className="text-sm text-gray-400 mb-1">Free Tier Usage</p>
                 <p className="text-2xl font-bold">
-                  {user.usage_count} <span className="text-gray-500">/ 3</span>
+                  {currentUsage} <span className="text-gray-500">/ 3</span>
                 </p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-400 mb-1">Remaining</p>
-                <p className="text-2xl font-bold text-[#00DC82]">{3 - user.usage_count}</p>
+                <p className="text-2xl font-bold text-[#00DC82]">{3 - currentUsage}</p>
               </div>
             </div>
-            {user.usage_count >= 3 && (
+            {currentUsage >= 3 && (
               <div className="mt-4 pt-4 border-t border-white/10">
                 <p className="text-sm text-yellow-500 mb-2">You've reached your free tier limit</p>
                 <button
