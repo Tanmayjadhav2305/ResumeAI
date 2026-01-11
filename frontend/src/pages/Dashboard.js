@@ -11,20 +11,30 @@ const Dashboard = ({ user, logout }) => {
   const navigate = useNavigate();
   const [analyses, setAnalyses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentUsage, setCurrentUsage] = useState(user.usage_count);
 
   useEffect(() => {
-    const fetchAnalyses = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${API}/analyses/${user.id}`);
-        setAnalyses(response.data.analyses);
+        // Fetch fresh user data and analyses
+        const [userResponse, analysesResponse] = await Promise.all([
+          axios.get(`${API}/user/${user.id}`),
+          axios.get(`${API}/analyses/${user.id}`)
+        ]);
+        
+        setCurrentUsage(userResponse.data.usage_count);
+        setAnalyses(analysesResponse.data.analyses);
+        
+        // Update localStorage
+        localStorage.setItem('usageCount', userResponse.data.usage_count);
       } catch (error) {
-        toast.error("Failed to load analyses");
+        toast.error("Failed to load data");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAnalyses();
+    fetchData();
   }, [user.id]);
 
   const formatDate = (dateStr) => {
