@@ -1,0 +1,128 @@
+{
+  "identity": {
+    "name": "ResumeAI",
+    "vibe": "Precision, Developer-Grade, Cyber-Professional",
+    "principles": [
+      "Fusion: Swiss Typography x Cyberpunk Palette",
+      "Emotion: Confidence & Clarity",
+      "Content: Data is the Hero",
+      "Interaction: Zero Latency, Liquid Smoothness"
+    ]
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Outfit, sans-serif",
+      "body": "Geist Sans, Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scale": {
+      "h1": "text-4xl md:text-6xl font-bold tracking-tight",
+      "h2": "text-3xl md:text-4xl font-semibold tracking-tight",
+      "h3": "text-xl md:text-2xl font-medium",
+      "body": "text-base md:text-lg leading-relaxed",
+      "small": "text-sm font-medium tracking-wide uppercase text-muted-foreground"
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "DEFAULT": "#00DC82",
+        "foreground": "#000000",
+        "hover": "#00C16F"
+      },
+      "background": {
+        "dark": "#0A0A0A",
+        "light": "#F9FAFB"
+      },
+      "surface": {
+        "dark": "#121212",
+        "light": "#FFFFFF"
+      },
+      "border": {
+        "dark": "#27272A",
+        "light": "#E5E7EB"
+      },
+      "muted": {
+        "dark": "#A1A1AA",
+        "light": "#64748B"
+      }
+    },
+    "usage": {
+      "accent": "Use Electric Green (#00DC82) for primary actions, scores, and success states.",
+      "error": "Use #EF4444 for critical errors or 'Needs Improvement' scores.",
+      "warning": "Use #F59E0B for 'Moderate' issues.",
+      "text": "High contrast always. White on Dark, Black on Light. No gray-on-gray text."
+    }
+  },
+  "layout": {
+    "grid_system": {
+      "dashboard": "grid grid-cols-1 md:grid-cols-12 gap-6",
+      "marketing": "grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12"
+    },
+    "spacing": {
+      "container": "px-4 md:px-8 max-w-7xl mx-auto",
+      "section": "py-16 md:py-24",
+      "card_padding": "p-6 md:p-8"
+    },
+    "bento_grid": {
+      "hero_card": "col-span-1 md:col-span-8 row-span-2",
+      "stat_card": "col-span-1 md:col-span-4",
+      "list_card": "col-span-1 md:col-span-4 row-span-2"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#00DC82] text-black hover:bg-[#00C16F] rounded-full px-8 py-3 font-semibold transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,220,130,0.3)]",
+      "secondary": "bg-white/10 text-white hover:bg-white/20 backdrop-blur-md border border-white/10 rounded-full px-6 py-2 font-medium transition-all"
+    },
+    "cards": {
+      "style": "bg-[#121212] border border-white/10 rounded-2xl overflow-hidden relative group",
+      "hover": "hover:border-[#00DC82]/50 transition-colors duration-300"
+    },
+    "inputs": {
+      "style": "bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-[#00DC82] focus:border-transparent transition-all placeholder:text-white/20"
+    },
+    "score_ring": {
+      "wrapper": "relative w-32 h-32 flex items-center justify-center",
+      "svg": "transform -rotate-90 w-full h-full",
+      "circle_bg": "stroke-white/10",
+      "circle_fg": "stroke-[#00DC82] transition-all duration-1000 ease-out"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "backdrop-blur-xl bg-black/40 border-b border-white/10",
+    "gradients": "No full-screen gradients. Use subtle radial gradients for spotlights.",
+    "shadows": "shadow-2xl shadow-black/50",
+    "motion": {
+      "scroll": "Use 'lenis' for smooth scrolling.",
+      "hover": "scale-[1.02] active:scale-[0.98]",
+      "entrance": "animate-in fade-in slide-in-from-bottom-4 duration-700"
+    }
+  },
+  "assets": {
+    "images": {
+      "hero_bg": "https://images.unsplash.com/photo-1759266039803-1f81c04bd4c0?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGRpZ2l0YWwlMjBuZXR3b3JrJTIwZ3JlZW4lMjBibGFja3xlbnwwfHx8fDE3NjgxNTYwNDV8MA&ixlib=rb-4.1.0&q=85",
+      "analysis_bg": "https://images.unsplash.com/photo-1767477665641-d36584e26267?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMGRpZ2l0YWwlMjBuZXR3b3JrJTIwZ3JlZW4lMjBibGFja3xlbnwwfHx8fDE3NjgxNTYwNDV8MA&ixlib=rb-4.1.0&q=85",
+      "tech_bg": "https://images.unsplash.com/photo-1764265992109-524e453c0e67?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHw0fHxhYnN0cmFjdCUyMGRpZ2l0YWwlMjBuZXR3b3JrJTIwZ3JlZW4lMjBibGFja3xlbnwwfHx8fDE3NjgxNTYwNDV8MA&ixlib=rb-4.1.0&q=85"
+    },
+    "icons": "Use 'lucide-react' for all UI icons. Use 'simple-icons' for brand logos if needed."
+  },
+  "instructions_to_main_agent": [
+    "1. INSTALL 'lenis' immediately for smooth scrolling.",
+    "2. IMPLEMENT Dark Mode as default, but support Light Mode via 'next-themes'.",
+    "3. USE 'Outfit' font for headings. Add it via Google Fonts or Fontsource.",
+    "4. CREATE a 'ScoreRing' component that animates the stroke-dashoffset.",
+    "5. ENSURE the 'Resume Upload' area is the visual centerpiece of the home page.",
+    "6. USE the provided image URLs for backgrounds with a heavy dark overlay (bg-black/80) to ensure text readability.",
+    "7. DO NOT use generic 'card' components. Build custom 'Bento' tiles with hover effects.",
+    "8. MOBILE FIRST: Stack everything on mobile. Use 'hidden md:block' for complex visualizations.",
+    "9. USE 'sonner' for all notifications (success/error).",
+    "10. KEEP animations subtle. No bouncing or spinning unless it's a loader."
+  ],
+  "universal_guidelines": [
+    "Avoid AI slop: No generic gradients, no centered text blocks without purpose.",
+    "Use 2-3x more spacing than typical designs.",
+    "Every interaction needs a micro-state (hover, focus, active).",
+    "Use 'data-testid' for all interactive elements."
+  ]
+}
