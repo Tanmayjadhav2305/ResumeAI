@@ -121,7 +121,10 @@ async def get_user_by_email(email: str):
 
 
 async def get_user_by_id(user_id: str):
-    return await db.users.find_one({"id": user_id}, {"_id": 0})
+    user = await db.users.find_one({"id": user_id})
+    if user and "_id" in user:
+        user["_id"] = str(user["_id"])
+    return user
 
 
 def extract_json(text: str) -> dict:
@@ -322,7 +325,7 @@ async def magic_link(req: MagicLinkRequest):
 @api_router.post("/auth/verify")
 async def verify(req: MagicLinkVerify):
     try:
-        user = await db.users.find_one({"magic_link_token": req.token}, {"_id": 0})
+        user = await db.users.find_one({"magic_link_token": req.token})
         if not user:
             raise HTTPException(status_code=401, detail="Invalid token")
         
@@ -331,19 +334,20 @@ async def verify(req: MagicLinkVerify):
             expiry_time = user["magic_link_expiry"]
             if isinstance(expiry_time, str):
                 expiry_time = datetime.fromisoformat(expiry_time.replace('Z', '+00:00'))
-            if expiry_time < datetime.now(timezone.utc):
+            if datetime.now(timezone.utc) > expiry_time:
                 raise HTTPException(status_code=401, detail="Token expired")
 
+        user_id = user.get("id", str(user.get("_id", "")))
         await db.users.update_one(
-            {"id": user["id"]},
+            {"id": user_id},
             {"$set": {"magic_link_token": None, "magic_link_expiry": None}},
         )
 
         logger.info(f"[AUTH] User verified: {user['email']}")
         return {
-            "user_id": user["id"],
+            "user_id": user_id,
             "email": user["email"],
-            "usage_count": user["usage_count"],
+            "usage_count": user.get("usage_count", 0),
             "usage_limit": FREE_TIER_LIMIT,
         }
     except HTTPException:
@@ -358,36 +362,42 @@ async def verify(req: MagicLinkVerify):
 # -------------------------------------------------
 @api_router.post("/analyze/text")
 async def analyze_text(request: ResumeTextRequest, user_id: str = ""):
-    if not user_id:
-        raise HTTPException(status_code=400, detail="user_id is required")
+    try:
+        if not user_id:
+            raise HTTPException(status_code=400, detail="user_id is required")
 
-    user = await get_user_by_id(user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        user = await get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
 
-    if user["usage_count"] >= FREE_TIER_LIMIT:
-        raise HTTPException(status_code=403, detail="Usage limit reached")
+        if user.get("usage_count", 0) >= FREE_TIER_LIMIT:
+            raise HTTPException(status_code=403, detail="Usage limit reached")
 
-    analysis = await analyze_resume_with_ai(
-        request.resume_text,
-        request.role_target,
-    )
+        analysis = await analyze_resume_with_ai(
+            request.resume_text,
+            request.role_target,
+        )
 
-    # Create and save analysis to database
-    resume_analysis = ResumeAnalysis(
-        user_id=user_id,
-        resume_text=request.resume_text[:500],
-        analysis_result=analysis
-    )
-    await db.analyses.insert_one(resume_analysis.model_dump(mode="json"))
+        # Create and save analysis to database
+        resume_analysis = ResumeAnalysis(
+            user_id=user_id,
+            resume_text=request.resume_text[:500],
+            analysis_result=analysis
+        )
+        await db.analyses.insert_one(resume_analysis.model_dump(mode="json"))
 
-    await db.users.update_one({"id": user_id}, {"$inc": {"usage_count": 1}})
+        await db.users.update_one({"id": user_id}, {"$inc": {"usage_count": 1}})
 
-    return {
-        "analysis_id": resume_analysis.id,
-        "analysis": analysis,
-        "remaining_uses": FREE_TIER_LIMIT - user["usage_count"] - 1,
-    }
+        return {
+            "analysis_id": resume_analysis.id,
+            "analysis": analysis,
+            "remaining_uses": FREE_TIER_LIMIT - user.get("usage_count", 0) - 1,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[ANALYZE] Text analysis error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Analysis failed")
 
 
 @api_router.post("/analyze/pdf")
@@ -396,40 +406,46 @@ async def analyze_pdf(
     user_id: str = "",
     role_target: Optional[str] = None,
 ):
-    if not user_id:
-        raise HTTPException(status_code=400, detail="user_id is required")
+    try:
+        if not user_id:
+            raise HTTPException(status_code=400, detail="user_id is required")
 
-    user = await get_user_by_id(user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        user = await get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
 
-    if user["usage_count"] >= FREE_TIER_LIMIT:
-        raise HTTPException(status_code=403, detail="Usage limit reached")
+        if user.get("usage_count", 0) >= FREE_TIER_LIMIT:
+            raise HTTPException(status_code=403, detail="Usage limit reached")
 
-    contents = await file.read()
-    pdf = PdfReader(io.BytesIO(contents))
-    resume_text = "".join(page.extract_text() or "" for page in pdf.pages)
+        contents = await file.read()
+        pdf = PdfReader(io.BytesIO(contents))
+        resume_text = "".join(page.extract_text() or "" for page in pdf.pages)
 
-    if not resume_text.strip():
-        raise HTTPException(status_code=400, detail="Could not extract text from PDF")
+        if not resume_text.strip():
+            raise HTTPException(status_code=400, detail="Could not extract text from PDF")
 
-    analysis = await analyze_resume_with_ai(resume_text, role_target)
+        analysis = await analyze_resume_with_ai(resume_text, role_target)
 
-    # Create and save analysis to database
-    resume_analysis = ResumeAnalysis(
-        user_id=user_id,
-        resume_text=resume_text[:500],
-        analysis_result=analysis
-    )
-    await db.analyses.insert_one(resume_analysis.model_dump(mode="json"))
+        # Create and save analysis to database
+        resume_analysis = ResumeAnalysis(
+            user_id=user_id,
+            resume_text=resume_text[:500],
+            analysis_result=analysis
+        )
+        await db.analyses.insert_one(resume_analysis.model_dump(mode="json"))
 
-    await db.users.update_one({"id": user_id}, {"$inc": {"usage_count": 1}})
+        await db.users.update_one({"id": user_id}, {"$inc": {"usage_count": 1}})
 
-    return {
-        "analysis_id": resume_analysis.id,
-        "analysis": analysis,
-        "remaining_uses": FREE_TIER_LIMIT - user["usage_count"] - 1,
-    }
+        return {
+            "analysis_id": resume_analysis.id,
+            "analysis": analysis,
+            "remaining_uses": FREE_TIER_LIMIT - user.get("usage_count", 0) - 1,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[ANALYZE] PDF analysis error: {str(e)}")
+        raise HTTPException(status_code=500, detail="PDF analysis failed")
 
 
 # -------------------------------------------------
