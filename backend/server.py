@@ -332,8 +332,13 @@ async def verify(req: MagicLinkVerify):
         # Check if token has expired
         if user.get("magic_link_expiry"):
             expiry_time = user["magic_link_expiry"]
+            
+            # Make sure expiry_time is timezone-aware
             if isinstance(expiry_time, str):
                 expiry_time = datetime.fromisoformat(expiry_time.replace('Z', '+00:00'))
+            elif expiry_time.tzinfo is None:
+                expiry_time = expiry_time.replace(tzinfo=timezone.utc)
+            
             if datetime.now(timezone.utc) > expiry_time:
                 raise HTTPException(status_code=401, detail="Token expired")
 
