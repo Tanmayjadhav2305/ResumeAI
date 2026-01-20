@@ -8,31 +8,31 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const ScoreRing = ({ score }) => {
-  const radius = 60;
+  const radius = 70;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (score / 100) * circumference;
 
   return (
-    <div className="score-ring">
-      <svg width="140" height="140">
+    <div className="score-ring-container">
+      <svg className="score-ring-svg" width="180" height="180" viewBox="0 0 180 180">
         <circle
           className="bg-circle"
-          cx="70"
-          cy="70"
+          cx="90"
+          cy="90"
           r={radius}
         />
         <circle
           className="fg-circle"
-          cx="70"
-          cy="70"
+          cx="90"
+          cy="90"
           r={radius}
           strokeDasharray={circumference}
           strokeDashoffset={offset}
         />
       </svg>
-      <div className="absolute inset-0 flex items-center justify-center flex-col">
-        <span className="text-3xl font-bold text-[#00DC82]">{score}</span>
-        <span className="text-xs text-gray-400">/ 100</span>
+      <div className="score-ring-text">
+        <span className="score-number">{score}</span>
+        <span className="score-total">/ 100</span>
       </div>
     </div>
   );

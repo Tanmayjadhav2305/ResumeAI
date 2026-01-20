@@ -39,6 +39,13 @@ const Analyze = ({ user }) => {
   };
 
   const handleAnalyze = async () => {
+    // Guard: Check user_id
+    if (!user?.id) {
+      toast.error("Please log in again");
+      navigate('/');
+      return;
+    }
+
     if (!resumeText.trim() && !file) {
       toast.error("Please provide your resume");
       return;
@@ -51,26 +58,51 @@ const Analyze = ({ user }) => {
       if (file) {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('user_id', user.id);
-        if (roleTarget) formData.append('role_target', roleTarget);
         
-        response = await axios.post(`${API}/analyze/pdf?user_id=${user.id}&role_target=${roleTarget}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        // DEBUG: Log PDF upload
+        console.log('[DEBUG] Uploading PDF with user_id:', user.id);
+        console.log('[DEBUG] Role target:', roleTarget || 'none');
+        
+        response = await axios.post(
+          `${API}/analyze/pdf?user_id=${encodeURIComponent(user.id)}&role_target=${encodeURIComponent(roleTarget || '')}`,
+          formData,
+          {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          }
+        );
       } else {
-        response = await axios.post(`${API}/analyze/text?user_id=${user.id}`, {
-          resume_text: resumeText,
-          role_target: roleTarget || null
-        });
+        // DEBUG: Log text analysis
+        console.log('[DEBUG] Analyzing text with user_id:', user.id);
+        
+        response = await axios.post(
+          `${API}/analyze/text?user_id=${encodeURIComponent(user.id)}`,
+          {
+            resume_text: resumeText,
+            role_target: roleTarget || null
+          }
+        );
       }
+      
+      console.log('[DEBUG] Analysis response:', response.data);
       
       localStorage.setItem('usageCount', user.usage_count + 1);
       toast.success("Analysis complete!");
       navigate(`/results/${response.data.analysis_id}`);
     } catch (error) {
+      console.error('[DEBUG] Analysis error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      
       if (error.response?.status === 403) {
         toast.error("Usage limit reached. Please upgrade.");
         setTimeout(() => navigate('/pricing'), 1500);
+      } else if (error.response?.status === 400) {
+        toast.error(error.response?.data?.detail || "Invalid request");
+      } else if (error.response?.status === 404) {
+        toast.error("User not found. Please log in again.");
+        navigate('/');
       } else {
         toast.error(error.response?.data?.detail || "Analysis failed");
       }

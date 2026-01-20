@@ -82,9 +82,9 @@ const Pricing = ({ user }) => {
             </div>
 
             {/* Pro Tier */}
-            <div className="glass-card p-8 relative border-2 border-[#00DC82]" data-testid="pro-tier-card">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span className="bg-[#00DC82] text-black px-4 py-1 rounded-full text-sm font-semibold">
+            <div className="glass-card p-8 relative border-2 border-[#00DC82] pt-16" data-testid="pro-tier-card">
+              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
+                <span className="bg-[#00DC82] text-black px-4 py-1 rounded-full text-sm font-semibold inline-block">
                   Coming Soon
                 </span>
               </div>

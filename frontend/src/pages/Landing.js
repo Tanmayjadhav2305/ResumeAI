@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, CheckCircle, ArrowRight } from "lucide-react";
 import axios from "axios";
@@ -13,6 +13,13 @@ const Landing = ({ user, setUser }) => {
   const [showMagicLinkSent, setShowMagicLinkSent] = useState(false);
   const [magicToken, setMagicToken] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleRequestMagicLink = async (e) => {
     e.preventDefault();
@@ -39,6 +46,9 @@ const Landing = ({ user, setUser }) => {
     try {
       const response = await axios.post(`${API}/auth/verify`, { token: magicToken });
       
+      // DEBUG: Log verification response
+      console.log('[DEBUG] Auth verify response:', response.data);
+      
       localStorage.setItem('userId', response.data.user_id);
       localStorage.setItem('userEmail', response.data.email);
       localStorage.setItem('usageCount', response.data.usage_count);
@@ -52,14 +62,15 @@ const Landing = ({ user, setUser }) => {
       toast.success("Logged in successfully!");
       navigate('/analyze');
     } catch (error) {
-      toast.error("Invalid or expired token");
+      console.error('[DEBUG] Auth verify error:', error.response?.data);
+      toast.error(error.response?.data?.detail || "Invalid or expired token");
     } finally {
       setLoading(false);
     }
   };
 
+  // Don't render if user exists - will redirect via useEffect
   if (user) {
-    navigate('/dashboard');
     return null;
   }
 
@@ -209,6 +220,121 @@ const Landing = ({ user, setUser }) => {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-[#0A0A0A] border-t border-gray-900 mt-20">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            {/* Brand */}
+            <div>
+              <h3 className="text-xl font-bold mb-2">
+                Resume<span className="text-[#00DC82]">AI</span>
+              </h3>
+              <p className="text-gray-400 text-sm">
+                AI-powered resume analysis to help you land your dream job.
+              </p>
+            </div>
+
+            {/* Product */}
+            <div>
+              <h4 className="font-semibold mb-4 text-white">Product</h4>
+              <ul className="space-y-2">
+                <li>
+                  <button 
+                    onClick={() => navigate('/analyze')}
+                    className="text-gray-400 hover:text-[#00DC82] transition text-sm"
+                  >
+                    Analyze Resume
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => navigate('/pricing')}
+                    className="text-gray-400 hover:text-[#00DC82] transition text-sm"
+                  >
+                    Pricing
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h4 className="font-semibold mb-4 text-white">Company</h4>
+              <ul className="space-y-2">
+                <li>
+                  <a 
+                    href="#about"
+                    className="text-gray-400 hover:text-[#00DC82] transition text-sm"
+                  >
+                    About Us
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="#contact"
+                    className="text-gray-400 hover:text-[#00DC82] transition text-sm"
+                  >
+                    Contact
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="font-semibold mb-4 text-white">Legal</h4>
+              <ul className="space-y-2">
+                <li>
+                  <a 
+                    href="#privacy"
+                    className="text-gray-400 hover:text-[#00DC82] transition text-sm"
+                  >
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="#terms"
+                    className="text-gray-400 hover:text-[#00DC82] transition text-sm"
+                  >
+                    Terms of Service
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-900 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-gray-500 text-sm">
+                © 2026 ResumeAI. All rights reserved.
+              </p>
+              <div className="flex gap-6">
+                <a 
+                  href="#twitter"
+                  className="text-gray-400 hover:text-[#00DC82] transition text-sm"
+                >
+                  Twitter
+                </a>
+                <a 
+                  href="#linkedin"
+                  className="text-gray-400 hover:text-[#00DC82] transition text-sm"
+                >
+                  LinkedIn
+                </a>
+                <a 
+                  href="#github"
+                  className="text-gray-400 hover:text-[#00DC82] transition text-sm"
+                >
+                  GitHub
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
