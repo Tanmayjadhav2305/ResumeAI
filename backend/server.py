@@ -52,7 +52,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# ✅ ADD THIS BLOCK IMMEDIATELY AFTER app creation
+# ✅ CORS MIDDLEWARE - MUST BE FIRST
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -64,6 +64,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 api_router = APIRouter(prefix="/api")
 
 # -------------------------------------------------
@@ -292,44 +293,64 @@ RESUME TO ANALYZE:
 # -------------------------------------------------
 @api_router.post("/auth/magic-link")
 async def magic_link(req: MagicLinkRequest):
-    token = secrets.token_urlsafe(32)
-    expiry = datetime.now(timezone.utc) + timedelta(seconds=MAGIC_LINK_EXPIRY)
+    try:
+        token = secrets.token_urlsafe(32)
+        expiry = datetime.now(timezone.utc) + timedelta(seconds=MAGIC_LINK_EXPIRY)
 
-    user = await get_user_by_email(req.email)
-    if not user:
-        await db.users.insert_one(
-            User(
-                email=req.email,
-                magic_link_token=token,
-                magic_link_expiry=expiry,
-            ).dict()
-        )
-    else:
-        await db.users.update_one(
-            {"email": req.email},
-            {"$set": {"magic_link_token": token, "magic_link_expiry": expiry}},
-        )
+        user = await get_user_by_email(req.email)
+        if not user:
+            await db.users.insert_one(
+                User(
+                    email=req.email,
+                    magic_link_token=token,
+                    magic_link_expiry=expiry,
+                ).dict()
+            )
+        else:
+            await db.users.update_one(
+                {"email": req.email},
+                {"$set": {"magic_link_token": token, "magic_link_expiry": expiry}},
+            )
 
-    return {"token": token}
+        logger.info(f"[AUTH] Magic link generated for {req.email}")
+        return {"token": token, "email": req.email, "message": "Magic link generated successfully"}
+    except Exception as e:
+        logger.error(f"[AUTH] Magic link error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to generate magic link")
 
 
 @api_router.post("/auth/verify")
 async def verify(req: MagicLinkVerify):
-    user = await db.users.find_one({"magic_link_token": req.token}, {"_id": 0})
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid token")
+    try:
+        user = await db.users.find_one({"magic_link_token": req.token}, {"_id": 0})
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        
+        # Check if token has expired
+        if user.get("magic_link_expiry"):
+            expiry_time = user["magic_link_expiry"]
+            if isinstance(expiry_time, str):
+                expiry_time = datetime.fromisoformat(expiry_time.replace('Z', '+00:00'))
+            if expiry_time < datetime.now(timezone.utc):
+                raise HTTPException(status_code=401, detail="Token expired")
 
-    await db.users.update_one(
-        {"id": user["id"]},
-        {"$set": {"magic_link_token": None, "magic_link_expiry": None}},
-    )
+        await db.users.update_one(
+            {"id": user["id"]},
+            {"$set": {"magic_link_token": None, "magic_link_expiry": None}},
+        )
 
-    return {
-        "user_id": user["id"],
-        "email": user["email"],
-        "usage_count": user["usage_count"],
-        "usage_limit": FREE_TIER_LIMIT,
-    }
+        logger.info(f"[AUTH] User verified: {user['email']}")
+        return {
+            "user_id": user["id"],
+            "email": user["email"],
+            "usage_count": user["usage_count"],
+            "usage_limit": FREE_TIER_LIMIT,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[AUTH] Verification error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Verification failed")
 
 
 # -------------------------------------------------
