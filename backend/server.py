@@ -56,7 +56,9 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://resume-ai-frontend-dusky.vercel.app"
+        "https://resume-ai-frontend-dusky.vercel.app",
+        "http://localhost:3000",
+        "*"
     ],
     allow_credentials=True,
     allow_methods=["*"],
