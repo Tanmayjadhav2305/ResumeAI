@@ -3,6 +3,9 @@ from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 
+
+
+
 import os
 import logging
 import asyncio
@@ -47,6 +50,17 @@ app = FastAPI(
     title="ResumeAI API",
     description="AI-powered resume analysis and optimization",
     version="1.0.0"
+)
+
+# ✅ ADD THIS BLOCK IMMEDIATELY AFTER app creation
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://resume-ai-frontend-dusky.vercel.app"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 api_router = APIRouter(prefix="/api")
 
