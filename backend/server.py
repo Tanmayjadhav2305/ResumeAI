@@ -458,6 +458,10 @@ async def health_check():
         }, 500
 
 
+# -------------------------------------------------
+# FINAL SETUP
+# -------------------------------------------------
+app.include_router(api_router)
 
 
 @app.on_event("shutdown")
