@@ -4,7 +4,11 @@ import { CheckCircle, XCircle, AlertCircle, ArrowLeft, TrendingUp } from "lucide
 import axios from "axios";
 import { toast } from "sonner";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL =
+  process.env.REACT_APP_BACKEND_URL ||
+  "https://resumeai-gva2.onrender.com";
+
+
 const API = `${BACKEND_URL}/api`;
 
 const ScoreRing = ({ score }) => {
