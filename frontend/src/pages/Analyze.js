@@ -4,11 +4,9 @@ import { Upload, FileText, Loader2 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 
-const BACKEND_URL =
-  process.env.REACT_APP_BACKEND_URL ||
-  "https://resumeai-gva2.onrender.com";
+import { API_BASE_URL } from "../config";
 
-const API = `${BACKEND_URL}/api`;
+const API = API_BASE_URL;
 
 const Analyze = ({ user }) => {
   const navigate = useNavigate();

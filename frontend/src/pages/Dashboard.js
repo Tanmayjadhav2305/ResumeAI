@@ -4,12 +4,10 @@ import { FileText, LogOut, Plus, Clock } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 
-const BACKEND_URL =
-  process.env.REACT_APP_BACKEND_URL ||
-  "https://resumeai-gva2.onrender.com";
+import { API_BASE_URL } from "../config";
 
+const API = API_BASE_URL;
 
-const API = `${BACKEND_URL}/api`;
 
 const Dashboard = ({ user, logout }) => {
   const navigate = useNavigate();
