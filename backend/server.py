@@ -458,18 +458,7 @@ async def health_check():
         }, 500
 
 
-# -------------------------------------------------
-# FINAL SETUP
-# -------------------------------------------------
-app.include_router(api_router)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","),
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 @app.on_event("shutdown")
 async def shutdown():
