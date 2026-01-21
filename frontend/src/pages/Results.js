@@ -85,10 +85,10 @@ const Results = ({ user }) => {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
       {/* Navbar */}
-      <nav className="navbar px-4 md:px-8 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <nav className="navbar px-4 sm:px-6 md:px-8 py-3 sm:py-4">
+        <div className="max-w-7xl mx-auto w-full flex justify-between items-center gap-4">
           <h1 
-            className="text-2xl font-bold cursor-pointer" 
+            className="text-lg sm:text-2xl font-bold cursor-pointer flex-shrink-0" 
             style={{ fontFamily: 'Outfit, sans-serif' }}
             onClick={() => navigate('/dashboard')}
             data-testid="nav-logo"
@@ -101,16 +101,17 @@ const Results = ({ user }) => {
             data-testid="back-to-dashboard-btn"
           >
             <ArrowLeft size={18} />
-            Dashboard
+            <span className="hidden sm:inline">Dashboard</span>
+            <span className="sm:hidden">Back</span>
           </button>
         </div>
       </nav>
 
       {/* Results */}
-      <section className="px-4 md:px-8 py-16">
+      <section className="px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16">
         <div className="max-w-6xl mx-auto">
           <h1 
-            className="text-3xl md:text-5xl font-bold tracking-tight mb-12 text-center"
+            className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-8 sm:mb-12 text-center"
             style={{ fontFamily: 'Outfit, sans-serif' }}
             data-testid="results-title"
           >
@@ -118,28 +119,28 @@ const Results = ({ user }) => {
           </h1>
 
           {/* Score Card */}
-          <div className="glass-card p-8 mb-8 text-center" data-testid="overall-score-card">
-            <h2 className="text-2xl font-semibold mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <div className="glass-card p-6 sm:p-8 mb-6 sm:mb-8 text-center" data-testid="overall-score-card">
+            <h2 className="text-xl sm:text-2xl font-semibold mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
               Overall Score
             </h2>
             <div className="flex justify-center mb-4">
               <ScoreRing score={result.overall_score} />
             </div>
-            <p className="text-gray-400">Your resume is performing {result.overall_score >= 70 ? 'well' : 'below average'}</p>
+            <p className="text-gray-400 text-sm sm:text-base">Your resume is performing {result.overall_score >= 70 ? 'well' : 'below average'}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
             {/* Strengths */}
             <div className="analysis-card" data-testid="strengths-card">
               <div className="flex items-center gap-2 mb-4">
-                <CheckCircle className="text-[#00DC82]" size={24} />
-                <h3 className="text-xl font-semibold" style={{ fontFamily: 'Outfit, sans-serif' }}>Strengths</h3>
+                <CheckCircle className="text-[#00DC82] flex-shrink-0" size={24} />
+                <h3 className="text-lg sm:text-xl font-semibold" style={{ fontFamily: 'Outfit, sans-serif' }}>Strengths</h3>
               </div>
               <ul className="space-y-2">
                 {result.strengths.map((strength, idx) => (
                   <li key={idx} className="flex items-start gap-2" data-testid={`strength-${idx}`}>
-                    <span className="text-[#00DC82] mt-1">•</span>
-                    <span className="text-gray-300">{strength}</span>
+                    <span className="text-[#00DC82] mt-0.5 flex-shrink-0">•</span>
+                    <span className="text-gray-300 text-sm sm:text-base">{strength}</span>
                   </li>
                 ))}
               </ul>
@@ -148,14 +149,14 @@ const Results = ({ user }) => {
             {/* Weaknesses */}
             <div className="analysis-card" data-testid="weaknesses-card">
               <div className="flex items-center gap-2 mb-4">
-                <XCircle className="text-red-500" size={24} />
-                <h3 className="text-xl font-semibold" style={{ fontFamily: 'Outfit, sans-serif' }}>Weaknesses</h3>
+                <XCircle className="text-red-500 flex-shrink-0" size={24} />
+                <h3 className="text-lg sm:text-xl font-semibold" style={{ fontFamily: 'Outfit, sans-serif' }}>Weaknesses</h3>
               </div>
               <ul className="space-y-2">
                 {result.weaknesses.map((weakness, idx) => (
                   <li key={idx} className="flex items-start gap-2" data-testid={`weakness-${idx}`}>
-                    <span className="text-red-500 mt-1">•</span>
-                    <span className="text-gray-300">{weakness}</span>
+                    <span className="text-red-500 mt-0.5 flex-shrink-0">•</span>
+                    <span className="text-gray-300 text-sm sm:text-base">{weakness}</span>
                   </li>
                 ))}
               </ul>
@@ -163,37 +164,37 @@ const Results = ({ user }) => {
           </div>
 
           {/* ATS Issues */}
-          <div className="analysis-card mb-8" data-testid="ats-issues-card">
+          <div className="analysis-card mb-6 sm:mb-8" data-testid="ats-issues-card">
             <div className="flex items-center gap-2 mb-4">
-              <AlertCircle className="text-yellow-500" size={24} />
-              <h3 className="text-xl font-semibold" style={{ fontFamily: 'Outfit, sans-serif' }}>ATS Issues</h3>
+              <AlertCircle className="text-yellow-500 flex-shrink-0" size={24} />
+              <h3 className="text-lg sm:text-xl font-semibold" style={{ fontFamily: 'Outfit, sans-serif' }}>ATS Issues</h3>
             </div>
             <ul className="space-y-2">
               {result.ats_issues.map((issue, idx) => (
                 <li key={idx} className="flex items-start gap-2" data-testid={`ats-issue-${idx}`}>
-                  <span className="text-yellow-500 mt-1">•</span>
-                  <span className="text-gray-300">{issue}</span>
+                  <span className="text-yellow-500 mt-0.5 flex-shrink-0">•</span>
+                  <span className="text-gray-300 text-sm sm:text-base">{issue}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Improved Bullets */}
-          <div className="analysis-card mb-8" data-testid="improved-bullets-card">
+          <div className="analysis-card mb-6 sm:mb-8" data-testid="improved-bullets-card">
             <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="text-[#00DC82]" size={24} />
-              <h3 className="text-xl font-semibold" style={{ fontFamily: 'Outfit, sans-serif' }}>Improved Bullet Points</h3>
+              <TrendingUp className="text-[#00DC82] flex-shrink-0" size={24} />
+              <h3 className="text-lg sm:text-xl font-semibold" style={{ fontFamily: 'Outfit, sans-serif' }}>Improved Bullet Points</h3>
             </div>
             <div className="space-y-4">
               {result.improved_bullets.map((bullet, idx) => (
                 <div key={idx} className="bullet-comparison" data-testid={`bullet-comparison-${idx}`}>
-                  <div className="original mb-3">
+                  <div className="original">
                     <span className="text-xs font-semibold uppercase text-red-400">Before</span>
-                    <p className="mt-1">{bullet.original}</p>
+                    <p className="mt-1 text-sm">{bullet.original}</p>
                   </div>
                   <div className="improved">
                     <span className="text-xs font-semibold uppercase text-[#00DC82]">After</span>
-                    <p className="mt-1">{bullet.improved}</p>
+                    <p className="mt-1 text-sm">{bullet.improved}</p>
                   </div>
                 </div>
               ))}
@@ -201,23 +202,23 @@ const Results = ({ user }) => {
           </div>
 
           {/* Recommendations */}
-          <div className="analysis-card" data-testid="recommendations-card">
-            <h3 className="text-xl font-semibold mb-4" style={{ fontFamily: 'Outfit, sans-serif' }}>Recommendations</h3>
+          <div className="analysis-card mb-8 sm:mb-12" data-testid="recommendations-card">
+            <h3 className="text-lg sm:text-xl font-semibold mb-4" style={{ fontFamily: 'Outfit, sans-serif' }}>Recommendations</h3>
             <ul className="space-y-2">
               {result.recommendations.map((rec, idx) => (
                 <li key={idx} className="flex items-start gap-2" data-testid={`recommendation-${idx}`}>
-                  <span className="text-[#00DC82] mt-1">→</span>
-                  <span className="text-gray-300">{rec}</span>
+                  <span className="text-[#00DC82] mt-0.5 flex-shrink-0">→</span>
+                  <span className="text-gray-300 text-sm sm:text-base">{rec}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* CTA */}
-          <div className="text-center mt-12">
+          <div className="text-center">
             <button
               onClick={() => navigate('/analyze')}
-              className="btn-primary text-lg"
+              className="btn-primary text-base sm:text-lg"
               data-testid="analyze-another-btn"
             >
               Analyze Another Resume
