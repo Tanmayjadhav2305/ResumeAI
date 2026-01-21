@@ -141,7 +141,7 @@ class ResumeAnalyzerAPITester:
             analysis = response.get('analysis', {})
             
             # Validate analysis structure
-            required_fields = ['overall_score', 'strengths', 'weaknesses', 'ats_issues', 'improved_bullets', 'recommendations']
+            required_fields = ['overall_score', 'score_verdict', 'summary_insight', 'strengths', 'weaknesses', 'ats_issues', 'improved_bullets', 'recommendations']
             missing_fields = [field for field in required_fields if field not in analysis]
             
             if missing_fields:

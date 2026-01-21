@@ -122,10 +122,15 @@ const Results = ({ user }) => {
             <h2 className="text-2xl font-semibold mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
               Overall Score
             </h2>
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center mb-6">
               <ScoreRing score={result.overall_score} />
             </div>
-            <p className="text-gray-400">Your resume is performing {result.overall_score >= 70 ? 'well' : 'below average'}</p>
+            {result.score_verdict && (
+              <p className="text-gray-300 mb-3 font-medium">{result.score_verdict}</p>
+            )}
+            {result.summary_insight && (
+              <p className="text-gray-400 text-sm">{result.summary_insight}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
