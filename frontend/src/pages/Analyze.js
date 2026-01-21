@@ -115,67 +115,66 @@ const Analyze = ({ user }) => {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
       {/* Navbar */}
-      <nav className="navbar px-4 sm:px-6 md:px-8 py-3 sm:py-4">
-        <div className="max-w-7xl mx-auto w-full flex justify-between items-center gap-4">
+      <nav className="navbar px-4 md:px-8 py-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
           <h1 
-            className="text-lg sm:text-2xl font-bold cursor-pointer flex-shrink-0" 
+            className="text-2xl font-bold cursor-pointer" 
             style={{ fontFamily: 'Outfit, sans-serif' }}
             onClick={() => navigate('/dashboard')}
             data-testid="nav-logo"
           >
             Resume<span className="text-[#00DC82]">AI</span>
           </h1>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="btn-secondary text-sm"
-            data-testid="nav-dashboard-btn"
-          >
-            <span className="hidden sm:inline">Dashboard</span>
-            <span className="sm:hidden">Back</span>
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="btn-secondary"
+              data-testid="nav-dashboard-btn"
+            >
+              Dashboard
+            </button>
+          </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <section className="px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16">
+      <section className="px-4 md:px-8 py-16">
         <div className="max-w-4xl mx-auto">
           <h1 
-            className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-3 sm:mb-4 text-center"
+            className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-center"
             style={{ fontFamily: 'Outfit, sans-serif' }}
             data-testid="analyze-title"
           >
             Analyze Your Resume
           </h1>
-          <p className="text-center text-gray-400 mb-8 sm:mb-12 text-sm sm:text-base px-2">
+          <p className="text-center text-gray-400 mb-12">
             Upload a PDF or paste your resume text below
           </p>
 
           {/* Input Mode Toggle */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8 justify-center">
+          <div className="flex gap-4 mb-8 justify-center">
             <button
               onClick={() => setInputMode("text")}
-              className={inputMode === "text" ? "btn-primary flex-1 sm:flex-none" : "btn-secondary flex-1 sm:flex-none"}
+              className={inputMode === "text" ? "btn-primary" : "btn-secondary"}
               data-testid="toggle-text-mode"
             >
-              <FileText size={18} className="mr-2" />
-              <span className="hidden sm:inline">Paste Text</span>
-              <span className="sm:hidden">Text</span>
+              <FileText size={20} className="inline mr-2" />
+              Paste Text
             </button>
             <button
               onClick={() => setInputMode("upload")}
-              className={inputMode === "upload" ? "btn-primary flex-1 sm:flex-none" : "btn-secondary flex-1 sm:flex-none"}
+              className={inputMode === "upload" ? "btn-primary" : "btn-secondary"}
               data-testid="toggle-upload-mode"
             >
-              <Upload size={18} className="mr-2" />
-              <span className="hidden sm:inline">Upload PDF</span>
-              <span className="sm:hidden">PDF</span>
+              <Upload size={20} className="inline mr-2" />
+              Upload PDF
             </button>
           </div>
 
-          <div className="glass-card p-6 sm:p-8 mb-6">
+          <div className="glass-card p-8 mb-6">
             {inputMode === "text" ? (
               <div>
-                <label className="block text-sm font-medium mb-3">Resume Text</label>
+                <label className="block text-sm font-medium mb-2">Resume Text</label>
                 <textarea
                   value={resumeText}
                   onChange={(e) => setResumeText(e.target.value)}
@@ -194,15 +193,15 @@ const Analyze = ({ user }) => {
                 onClick={() => document.getElementById('file-input').click()}
                 data-testid="upload-zone"
               >
-                <Upload className="w-12 sm:w-16 h-12 sm:h-16 text-[#00DC82] mx-auto mb-4" />
+                <Upload className="w-16 h-16 text-[#00DC82] mx-auto mb-4" />
                 {file ? (
-                  <p className="text-base sm:text-lg">
+                  <p className="text-lg">
                     <span className="text-[#00DC82]">✓</span> {file.name}
                   </p>
                 ) : (
                   <>
-                    <p className="text-base sm:text-lg mb-2">Drop your PDF here or click to browse</p>
-                    <p className="text-xs sm:text-sm text-gray-500">PDF files only</p>
+                    <p className="text-lg mb-2">Drop your PDF here or click to browse</p>
+                    <p className="text-sm text-gray-500">PDF files only</p>
                   </>
                 )}
                 <input
@@ -215,7 +214,7 @@ const Analyze = ({ user }) => {
             )}
 
             <div className="mt-6">
-              <label className="block text-sm font-medium mb-3">Target Role (Optional)</label>
+              <label className="block text-sm font-medium mb-2">Target Role (Optional)</label>
               <input
                 type="text"
                 value={roleTarget}
@@ -230,20 +229,20 @@ const Analyze = ({ user }) => {
           <button
             onClick={handleAnalyze}
             disabled={loading || (!resumeText.trim() && !file)}
-            className="btn-primary w-full text-base sm:text-lg py-3 sm:py-4 flex items-center justify-center gap-2"
+            className="btn-primary w-full text-lg py-4 flex items-center justify-center gap-2"
             data-testid="analyze-btn"
           >
             {loading ? (
               <>
-                <Loader2 className="animate-spin" size={20} />
-                <span>Analyzing...</span>
+                <Loader2 className="animate-spin" size={24} />
+                Analyzing...
               </>
             ) : (
               "Analyze Resume"
             )}
           </button>
 
-          <p className="text-center text-xs sm:text-sm text-gray-500 mt-4">
+          <p className="text-center text-sm text-gray-500 mt-4">
             Remaining analyses: {3 - user.usage_count} / 3
           </p>
         </div>

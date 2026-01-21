@@ -79,14 +79,14 @@ const Landing = ({ user, setUser }) => {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white">
       {/* Navbar */}
-      <nav className="navbar px-4 sm:px-6 md:px-8 py-3 sm:py-4">
-        <div className="max-w-7xl mx-auto w-full flex justify-between items-center gap-4">
-          <h1 className="text-lg sm:text-2xl font-bold flex-shrink-0" style={{ fontFamily: 'Outfit, sans-serif' }}>
+      <nav className="navbar px-4 md:px-8 py-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-bold" style={{ fontFamily: 'Outfit, sans-serif' }}>
             Resume<span className="text-[#00DC82]">AI</span>
           </h1>
           <button
             onClick={() => navigate('/pricing')}
-            className="btn-secondary text-sm"
+            className="btn-secondary"
             data-testid="nav-pricing-btn"
           >
             Pricing
@@ -95,27 +95,27 @@ const Landing = ({ user, setUser }) => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative px-4 sm:px-6 md:px-8 py-12 sm:py-16 md:py-24">
+      <section className="relative px-4 md:px-8 py-16 md:py-24">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-4xl mx-auto text-center">
             <h1 
-              className="text-3xl sm:text-4xl md:text-6xl font-bold tracking-tight mb-4 sm:mb-6 fade-in leading-tight"
+              className="text-4xl md:text-6xl font-bold tracking-tight mb-6 fade-in"
               style={{ fontFamily: 'Outfit, sans-serif' }}
               data-testid="hero-title"
             >
               Transform Your Resume with
               <span className="text-[#00DC82]"> AI Precision</span>
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-400 mb-8 sm:mb-12 leading-relaxed px-2">
+            <p className="text-lg md:text-xl text-gray-400 mb-12 leading-relaxed">
               Get instant ATS analysis, actionable improvements, and role-specific optimization.
               Built for professionals who mean business.
             </p>
 
             {/* Auth Card */}
-            <div className="glass-card max-w-md mx-auto p-6 sm:p-8">
+            <div className="glass-card max-w-md mx-auto p-8">
               {!showMagicLinkSent ? (
                 <>
-                  <h3 className="text-lg sm:text-xl font-semibold mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  <h3 className="text-xl font-semibold mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
                     Get Started - Free Analysis
                   </h3>
                   <form onSubmit={handleRequestMagicLink}>
@@ -125,9 +125,8 @@ const Landing = ({ user, setUser }) => {
                         placeholder="your@email.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-[#00DC82] focus:border-transparent transition-all placeholder:text-white/20"
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-lg focus:ring-2 focus:ring-[#00DC82] focus:border-transparent transition-all placeholder:text-white/20"
                         data-testid="email-input"
-                        disabled={loading}
                       />
                     </div>
                     <button
@@ -139,13 +138,12 @@ const Landing = ({ user, setUser }) => {
                       {loading ? "Sending..." : (
                         <>
                           <Mail size={20} />
-                          <span className="hidden sm:inline">Send Magic Link</span>
-                          <span className="sm:hidden">Send Link</span>
+                          Send Magic Link
                         </>
                       )}
                     </button>
                   </form>
-                  <p className="text-xs sm:text-sm text-gray-500 mt-4">
+                  <p className="text-sm text-gray-500 mt-4">
                     No password needed. We'll send you a secure link.
                   </p>
                 </>
@@ -183,17 +181,17 @@ const Landing = ({ user, setUser }) => {
       </section>
 
       {/* Features Section */}
-      <section className="px-4 sm:px-6 md:px-8 py-12 sm:py-16">
+      <section className="px-4 md:px-8 py-16">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            <div className="glass-card p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="glass-card p-6" data-testid="feature-ats-analysis">
               <div className="w-12 h-12 bg-[#00DC82]/10 rounded-full flex items-center justify-center mb-4">
                 <CheckCircle className="text-[#00DC82]" size={24} />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              <h3 className="text-xl font-semibold mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
                 ATS Optimization
               </h3>
-              <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
+              <p className="text-gray-400">
                 Ensure your resume passes applicant tracking systems with data-driven insights.
               </p>
             </div>
@@ -202,10 +200,10 @@ const Landing = ({ user, setUser }) => {
               <div className="w-12 h-12 bg-[#00DC82]/10 rounded-full flex items-center justify-center mb-4">
                 <CheckCircle className="text-[#00DC82]" size={24} />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              <h3 className="text-xl font-semibold mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
                 AI-Powered Rewrites
               </h3>
-              <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
+              <p className="text-gray-400">
                 Get professional bullet point improvements that highlight your impact.
               </p>
             </div>
@@ -214,10 +212,10 @@ const Landing = ({ user, setUser }) => {
               <div className="w-12 h-12 bg-[#00DC82]/10 rounded-full flex items-center justify-center mb-4">
                 <CheckCircle className="text-[#00DC82]" size={24} />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              <h3 className="text-xl font-semibold mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
                 Role-Specific Tips
               </h3>
-              <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
+              <p className="text-gray-400">
                 Tailor your resume for specific roles with targeted recommendations.
               </p>
             </div>
@@ -226,27 +224,27 @@ const Landing = ({ user, setUser }) => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#0A0A0A] border-t border-gray-900 mt-12 sm:mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-8">
+      <footer className="bg-[#0A0A0A] border-t border-gray-900 mt-20">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             {/* Brand */}
             <div>
-              <h3 className="text-lg sm:text-xl font-bold mb-2">
+              <h3 className="text-xl font-bold mb-2">
                 Resume<span className="text-[#00DC82]">AI</span>
               </h3>
-              <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
+              <p className="text-gray-400 text-sm">
                 AI-powered resume analysis to help you land your dream job.
               </p>
             </div>
 
             {/* Product */}
             <div>
-              <h4 className="font-semibold mb-4 text-white text-sm sm:text-base">Product</h4>
+              <h4 className="font-semibold mb-4 text-white">Product</h4>
               <ul className="space-y-2">
                 <li>
                   <button 
                     onClick={() => navigate('/analyze')}
-                    className="text-gray-400 hover:text-[#00DC82] transition text-xs sm:text-sm"
+                    className="text-gray-400 hover:text-[#00DC82] transition text-sm"
                   >
                     Analyze Resume
                   </button>
@@ -254,7 +252,7 @@ const Landing = ({ user, setUser }) => {
                 <li>
                   <button 
                     onClick={() => navigate('/pricing')}
-                    className="text-gray-400 hover:text-[#00DC82] transition text-xs sm:text-sm"
+                    className="text-gray-400 hover:text-[#00DC82] transition text-sm"
                   >
                     Pricing
                   </button>
@@ -264,12 +262,12 @@ const Landing = ({ user, setUser }) => {
 
             {/* Company */}
             <div>
-              <h4 className="font-semibold mb-4 text-white text-sm sm:text-base">Company</h4>
+              <h4 className="font-semibold mb-4 text-white">Company</h4>
               <ul className="space-y-2">
                 <li>
                   <a 
                     href="#about"
-                    className="text-gray-400 hover:text-[#00DC82] transition text-xs sm:text-sm"
+                    className="text-gray-400 hover:text-[#00DC82] transition text-sm"
                   >
                     About Us
                   </a>
@@ -277,7 +275,7 @@ const Landing = ({ user, setUser }) => {
                 <li>
                   <a 
                     href="#contact"
-                    className="text-gray-400 hover:text-[#00DC82] transition text-xs sm:text-sm"
+                    className="text-gray-400 hover:text-[#00DC82] transition text-sm"
                   >
                     Contact
                   </a>
@@ -287,12 +285,12 @@ const Landing = ({ user, setUser }) => {
 
             {/* Legal */}
             <div>
-              <h4 className="font-semibold mb-4 text-white text-sm sm:text-base">Legal</h4>
+              <h4 className="font-semibold mb-4 text-white">Legal</h4>
               <ul className="space-y-2">
                 <li>
                   <a 
                     href="#privacy"
-                    className="text-gray-400 hover:text-[#00DC82] transition text-xs sm:text-sm"
+                    className="text-gray-400 hover:text-[#00DC82] transition text-sm"
                   >
                     Privacy Policy
                   </a>
@@ -300,7 +298,7 @@ const Landing = ({ user, setUser }) => {
                 <li>
                   <a 
                     href="#terms"
-                    className="text-gray-400 hover:text-[#00DC82] transition text-xs sm:text-sm"
+                    className="text-gray-400 hover:text-[#00DC82] transition text-sm"
                   >
                     Terms of Service
                   </a>
@@ -310,27 +308,27 @@ const Landing = ({ user, setUser }) => {
           </div>
 
           {/* Divider */}
-          <div className="border-t border-gray-900 pt-6 sm:pt-8">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6">
-              <p className="text-gray-500 text-xs sm:text-sm text-center sm:text-left">
+          <div className="border-t border-gray-900 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-gray-500 text-sm">
                 © 2026 ResumeAI. All rights reserved.
               </p>
-              <div className="flex gap-4 sm:gap-6">
+              <div className="flex gap-6">
                 <a 
                   href="#twitter"
-                  className="text-gray-400 hover:text-[#00DC82] transition text-xs sm:text-sm"
+                  className="text-gray-400 hover:text-[#00DC82] transition text-sm"
                 >
                   Twitter
                 </a>
                 <a 
                   href="#linkedin"
-                  className="text-gray-400 hover:text-[#00DC82] transition text-xs sm:text-sm"
+                  className="text-gray-400 hover:text-[#00DC82] transition text-sm"
                 >
                   LinkedIn
                 </a>
                 <a 
                   href="#github"
-                  className="text-gray-400 hover:text-[#00DC82] transition text-xs sm:text-sm"
+                  className="text-gray-400 hover:text-[#00DC82] transition text-sm"
                 >
                   GitHub
                 </a>
