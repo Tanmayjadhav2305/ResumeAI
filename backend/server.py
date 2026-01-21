@@ -195,62 +195,96 @@ async def analyze_resume_with_ai(resume_text: str, role_target: Optional[str]) -
     # Trim resume to avoid token overflow
     resume_text = resume_text[:MAX_RESUME_CHARS]
 
-    prompt = f"""You are a senior ATS (Applicant Tracking System) evaluator and technical recruiter with 10+ years of experience.
+    prompt = f"""
+You are an experienced ATS evaluator and senior recruiter with over 10 years of hiring experience.
 
-Your task is to honestly and critically evaluate the resume below for the given role.
-Be STRICT, REALISTIC, and HIGHLY DIFFERENTIATED in scoring.
+Your job is to evaluate the resume BELOW as both:
+1) An Applicant Tracking System (ATS)
+2) A real human recruiter
+
+Be honest, strict, and realistic. Do NOT soften feedback.
 
 TARGET ROLE:
 {role_target or "general job applications"}
 
-SCORING CALIBRATION (CRITICAL - DO NOT GIVE SAME SCORES):
-- 80-90: Excellent resume - Strong relevant experience, multiple projects, clear metrics, proper keywords, ready for interviews
-- 70-79: Good resume - Solid experience, decent projects, some metrics, most keywords present
-- 60-69: Average resume - Basic experience, average projects, weak metrics, missing some keywords
-- 50-59: Below average - Limited relevant experience, vague accomplishments, poor metrics, missing key skills
-- 35-49: Weak resume - Poorly aligned skills, lack of concrete examples, minimal metrics, ATS unfriendly
-- IMPORTANT: Different resumes MUST receive different scores unless quality is truly identical
+SCORING RULES (VERY IMPORTANT):
+- Scores must be DIFFERENT for different resumes
+- Avoid safe or average scores unless truly deserved
+- Use the full range when appropriate
+
+Score meaning:
+- 85–95: Excellent – interview-ready, strong impact, well-optimized
+- 70–84: Good – solid resume, some improvements needed
+- 55–69: Average – noticeable gaps, weak impact
+- 40–54: Poor – not competitive, major changes required
+- Below 40: Very weak – unlikely to pass ATS or recruiter screening
 
 EVALUATION CRITERIA:
-1. Relevance: How well skills/experience match the target role
-2. Specificity: Concrete examples, metrics, and measurable impact (not vague descriptions)
-3. Keywords: Industry-standard terms for the role
-4. ATS Compatibility: Formatting, structure, clarity for automated parsing
-5. Depth: Quality and complexity of projects/achievements
-6. Impact: Quantifiable results and business value demonstrated
+1. Relevance to the target role
+2. Clarity and specificity of experience
+3. Use of role-specific keywords
+4. ATS friendliness (formatting, structure, parsing)
+5. Depth and quality of projects or work
+6. Measurable impact (numbers, results, outcomes)
 
-ATS RED FLAGS to identify:
-- Walls of text (paragraphs instead of bullets)
-- Missing industry keywords
-- Vague accomplishments ("worked on", "helped with")
-- Inconsistent formatting
-- Unusual fonts or special characters
-- No metrics or numbers
+COMMON ATS PROBLEMS TO CHECK:
+- Missing important keywords
+- Generic or vague bullet points
+- Long paragraphs instead of bullet points
+- No numbers or measurable results
+- Poor section structure or unclear headings
 
-CRITICAL INSTRUCTIONS:
-- Provide honest, differentiated scores
-- Avoid generic feedback - be specific to THIS resume
-- Strengths/weaknesses must reference actual content
-- Improved bullets must show meaningful enhancement with:
-  * Stronger action verbs (Led, Engineered, Optimized, Scaled, etc.)
-  * Quantifiable metrics (%, $, time saved, etc.)
-  * Business impact, not just tasks
-- Recommendations must be actionable and role-specific
+IMPORTANT INSTRUCTIONS:
+- Use SIMPLE, CLEAR English (avoid jargon)
+- Feedback must be easy for a normal user to understand
+- Be specific to THIS resume (no generic advice)
+- Do NOT exaggerate strengths
+- Do NOT hide weaknesses
 
-Return ONLY valid JSON. No markdown, explanations, or extra text.
+For improved bullets:
+- Use strong action verbs (Built, Improved, Optimized, Led, Automated)
+- Add metrics where possible (% improvement, time saved, scale)
+- Focus on RESULTS, not responsibilities
 
-JSON format:
+Return ONLY valid JSON. No markdown. No extra text.
+
+JSON FORMAT:
 {{
-  "overall_score": [0-100 integer reflecting true resume quality],
-  "strengths": ["specific strength 1 with context", "specific strength 2 with context", "specific strength 3 with context"],
-  "weaknesses": ["specific weakness 1 with impact", "specific weakness 2 with impact", "specific weakness 3 with impact"],
-  "ats_issues": ["specific ATS issue 1", "specific ATS issue 2", "specific ATS issue 3"],
-  "improved_bullets": [
-    {{"original": "exact original bullet from resume", "improved": "improved version with action verb, metric, and business impact"}},
-    {{"original": "exact original bullet from resume", "improved": "improved version with action verb, metric, and business impact"}},
-    {{"original": "exact original bullet from resume", "improved": "improved version with action verb, metric, and business impact"}}
+  "overall_score": <integer 0–100>,
+  "strengths": [
+    "Clear, resume-specific strength",
+    "Clear, resume-specific strength",
+    "Clear, resume-specific strength"
   ],
-  "recommendations": ["actionable recommendation 1 for role-specific improvement", "actionable recommendation 2", "actionable recommendation 3"]
+  "weaknesses": [
+    "Clear weakness and why it hurts ATS or recruiters",
+    "Clear weakness and why it hurts ATS or recruiters",
+    "Clear weakness and why it hurts ATS or recruiters"
+  ],
+  "ats_issues": [
+    "Specific ATS issue",
+    "Specific ATS issue",
+    "Specific ATS issue"
+  ],
+  "improved_bullets": [
+    {{
+      "original": "Exact original bullet",
+      "improved": "Improved bullet with action verb, metric, and impact"
+    }},
+    {{
+      "original": "Exact original bullet",
+      "improved": "Improved bullet with action verb, metric, and impact"
+    }},
+    {{
+      "original": "Exact original bullet",
+      "improved": "Improved bullet with action verb, metric, and impact"
+    }}
+  ],
+  "recommendations": [
+    "Very clear, actionable step the user should do next",
+    "Very clear, actionable step the user should do next",
+    "Very clear, actionable step the user should do next"
+  ]
 }}
 
 RESUME TO ANALYZE:

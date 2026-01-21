@@ -204,10 +204,16 @@ const Results = ({ user }) => {
           <div className="analysis-card" data-testid="recommendations-card">
             <h3 className="text-xl font-semibold mb-4" style={{ fontFamily: 'Outfit, sans-serif' }}>Recommendations</h3>
             <ul className="space-y-2">
-              {result.recommendations.map((rec, idx) => (
+              {result.recommendations && result.recommendations.map((rec, idx) => (
                 <li key={idx} className="flex items-start gap-2" data-testid={`recommendation-${idx}`}>
                   <span className="text-[#00DC82] mt-1">→</span>
                   <span className="text-gray-300">{rec}</span>
+                </li>
+              ))}
+              {result.next_steps && result.next_steps.map((step, idx) => (
+                <li key={idx} className="flex items-start gap-2" data-testid={`next-step-${idx}`}>
+                  <span className="text-[#00DC82] mt-1">→</span>
+                  <span className="text-gray-300">{step}</span>
                 </li>
               ))}
             </ul>
