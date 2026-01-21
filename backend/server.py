@@ -129,15 +129,32 @@ async def get_user_by_id(user_id: str):
 
 def extract_json(text: str) -> dict:
     """
-    Extract valid JSON from Gemini output.
+    Extract valid JSON from AI output.
+    Handles cases where extra text appears before/after JSON.
     """
+    text = text.strip()
+    
     try:
         return json.loads(text)
     except json.JSONDecodeError:
+        # Try to find JSON object in the text
         match = re.search(r"\{[\s\S]*\}", text)
         if not match:
-            raise
-        return json.loads(match.group())
+            raise ValueError("No JSON object found in response")
+        
+        json_str = match.group()
+        
+        try:
+            return json.loads(json_str)
+        except json.JSONDecodeError as e:
+            # Try to find the valid JSON by trimming from the end
+            for i in range(len(json_str), 0, -1):
+                try:
+                    return json.loads(json_str[:i])
+                except json.JSONDecodeError:
+                    continue
+            
+            raise ValueError(f"Could not parse JSON: {str(e)}")
 
 
 def validate_resume_content(text: str) -> tuple[bool, str]:
@@ -310,8 +327,9 @@ RESUME TO ANALYZE:
                 raise ValueError("Groq response has no message")
 
             text = response.choices[0].message.content.strip()
+            logger.info(f"[AI] Raw response length: {len(text)}")
+            
             result = extract_json(text)
-
             logger.info("[AI] JSON parsed successfully")
             return result
 
