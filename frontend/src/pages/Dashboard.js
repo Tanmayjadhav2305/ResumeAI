@@ -169,7 +169,7 @@ const Dashboard = ({ user, logout }) => {
                           </div>
                         </div>
                         <p className="text-sm text-gray-400 mt-2 line-clamp-2">
-                          {analysis.resume_text}
+                          {analysis.analysis_result.strengths[0] || "Resume analyzed successfully"}
                         </p>
                       </div>
                       <div className="text-right ml-4">
