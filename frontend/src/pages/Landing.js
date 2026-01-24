@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, CheckCircle, ArrowRight } from "lucide-react";
+import { Mail, CheckCircle, ArrowRight, Lock } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
 
@@ -12,9 +12,10 @@ const API = API_BASE_URL;
 const Landing = ({ user, setUser }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [showMagicLinkSent, setShowMagicLinkSent] = useState(false);
-  const [magicToken, setMagicToken] = useState("");
+  const [otp, setOtp] = useState("");
+  const [showOtpInput, setShowOtpInput] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -23,7 +24,7 @@ const Landing = ({ user, setUser }) => {
     }
   }, [user, navigate]);
 
-  const handleRequestMagicLink = async (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!email) {
       toast.error("Please enter your email");
@@ -32,24 +33,30 @@ const Landing = ({ user, setUser }) => {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${API}/auth/magic-link`, { email });
-      setMagicToken(response.data.token);
-      setShowMagicLinkSent(true);
-      toast.success("Magic link generated!");
+      await axios.post(`${API}/auth/send-otp`, { email });
+      setShowOtpInput(true);
+      setOtpSent(true);
+      toast.success("OTP sent to your email!");
     } catch (error) {
-      toast.error("Failed to send magic link");
+      toast.error(error.response?.data?.detail || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerifyToken = async () => {
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    if (!otp || otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP");
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await axios.post(`${API}/auth/verify`, { token: magicToken });
-      
-      // DEBUG: Log verification response
-      console.log('[DEBUG] Auth verify response:', response.data);
+      const response = await axios.post(`${API}/auth/verify-otp`, { 
+        email, 
+        otp_code: otp 
+      });
       
       localStorage.setItem('userId', response.data.user_id);
       localStorage.setItem('userEmail', response.data.email);
@@ -64,8 +71,7 @@ const Landing = ({ user, setUser }) => {
       toast.success("Logged in successfully!");
       navigate('/analyze');
     } catch (error) {
-      console.error('[DEBUG] Auth verify error:', error.response?.data);
-      toast.error(error.response?.data?.detail || "Invalid or expired token");
+      toast.error(error.response?.data?.detail || "Invalid or expired OTP");
     } finally {
       setLoading(false);
     }
@@ -113,12 +119,12 @@ const Landing = ({ user, setUser }) => {
 
             {/* Auth Card */}
             <div className="glass-card max-w-md mx-auto p-8">
-              {!showMagicLinkSent ? (
+              {!showOtpInput ? (
                 <>
                   <h3 className="text-xl font-semibold mb-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
                     Get Started - Free Analysis
                   </h3>
-                  <form onSubmit={handleRequestMagicLink}>
+                  <form onSubmit={handleSendOtp}>
                     <div className="mb-4">
                       <input
                         type="email"
@@ -133,45 +139,63 @@ const Landing = ({ user, setUser }) => {
                       type="submit"
                       disabled={loading}
                       className="btn-primary w-full flex items-center justify-center gap-2"
-                      data-testid="get-magic-link-btn"
+                      data-testid="get-otp-btn"
                     >
                       {loading ? "Sending..." : (
                         <>
                           <Mail size={20} />
-                          Send Magic Link
+                          Send OTP
                         </>
                       )}
                     </button>
                   </form>
                   <p className="text-sm text-gray-500 mt-4">
-                    No password needed. We'll send you a secure link.
+                    We'll send you a secure one-time code.
                   </p>
                 </>
               ) : (
                 <>
                   <CheckCircle className="w-16 h-16 text-[#00DC82] mx-auto mb-4" />
                   <h3 className="text-xl font-semibold mb-4" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                    Magic Link Sent!
+                    OTP Sent!
                   </h3>
                   <p className="text-gray-400 mb-6">
-                    Check your email for the magic link.
+                    Enter the 6-digit code sent to<br /><span className="text-[#00DC82] font-semibold">{email}</span>
                   </p>
-                  <div className="bg-black/50 border border-[#00DC82]/30 rounded-lg p-4 mb-6">
-                    <p className="text-xs text-gray-500 mb-2">DEV MODE: Your token</p>
-                    <p className="text-sm font-mono text-[#00DC82] break-all">{magicToken}</p>
-                  </div>
+                  <form onSubmit={handleVerifyOtp}>
+                    <div className="mb-4">
+                      <input
+                        type="text"
+                        placeholder="000000"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        maxLength="6"
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-4 text-4xl text-center font-mono focus:ring-2 focus:ring-[#00DC82] focus:border-transparent transition-all tracking-widest"
+                        data-testid="otp-input"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={loading || otp.length !== 6}
+                      className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      data-testid="verify-otp-btn"
+                    >
+                      {loading ? "Verifying..." : (
+                        <>
+                          <Lock size={20} />
+                          Verify & Continue
+                        </>
+                      )}
+                    </button>
+                  </form>
                   <button
-                    onClick={handleVerifyToken}
-                    disabled={loading}
-                    className="btn-primary w-full flex items-center justify-center gap-2"
-                    data-testid="verify-token-btn"
+                    onClick={() => {
+                      setShowOtpInput(false);
+                      setOtp("");
+                    }}
+                    className="text-sm text-gray-500 hover:text-gray-400 mt-4 transition-colors"
                   >
-                    {loading ? "Verifying..." : (
-                      <>
-                        Continue
-                        <ArrowRight size={20} />
-                      </>
-                    )}
+                    Back to email
                   </button>
                 </>
               )}

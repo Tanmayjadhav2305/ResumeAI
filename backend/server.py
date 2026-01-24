@@ -2,8 +2,9 @@ from fastapi import FastAPI, APIRouter, HTTPException, UploadFile, File
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-
-
+from brevo_python import Configuration, ApiClient, TransactionalEmailsApi
+from brevo_python.rest import ApiException
+from brevo_python.models.send_smtp_email import SendSmtpEmail
 
 
 import os
@@ -18,6 +19,8 @@ from typing import Optional
 import uuid
 from datetime import datetime, timezone, timedelta
 import secrets
+import random
+import string
 from pypdf import PdfReader
 
 from groq import Groq
@@ -29,7 +32,7 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
 
 # Validate required environment variables
-required_env_vars = ["MONGO_URL", "DB_NAME", "GROQ_API_KEY", "MAGIC_LINK_SECRET"]
+required_env_vars = ["MONGO_URL", "DB_NAME", "GROQ_API_KEY", "BREVO_API_KEY", "BREVO_SENDER_EMAIL", "OTP_EXPIRY"]
 missing_vars = [var for var in required_env_vars if not os.environ.get(var)]
 if missing_vars:
     raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}. Please check your .env file.")
@@ -42,6 +45,13 @@ try:
     db = client[os.environ["DB_NAME"]]
 except Exception as e:
     raise ValueError(f"Failed to initialize database connection: {str(e)}")
+
+# -------------------------------------------------
+# BREVO EMAIL SERVICE
+# -------------------------------------------------
+brevo_config = Configuration()
+brevo_config.api_key["api-key"] = os.environ["BREVO_API_KEY"]
+brevo_api_client = ApiClient(brevo_config)
 
 # -------------------------------------------------
 # APP
@@ -57,8 +67,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://resume-ai-frontend-dusky.vercel.app",
+        "https://resumeai-gva2.onrender.com",
         "http://localhost:3000",
-        "*"
+        "http://127.0.0.1:3000",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -77,7 +88,8 @@ logger = logging.getLogger("resume-ai")
 # CONSTANTS
 # -------------------------------------------------
 FREE_TIER_LIMIT = 3
-MAGIC_LINK_EXPIRY = 3600
+OTP_EXPIRY_SECONDS = int(os.environ.get("OTP_EXPIRY", "600"))  # 10 minutes default
+OTP_LENGTH = 6
 MAX_RESUME_CHARS = 12000  # token safety for gemini-1.0-pro
 
 # -------------------------------------------------
@@ -87,8 +99,8 @@ class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     email: EmailStr
     usage_count: int = 0
-    magic_link_token: Optional[str] = None
-    magic_link_expiry: Optional[datetime] = None
+    otp_code: Optional[str] = None
+    otp_expiry: Optional[datetime] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -100,12 +112,13 @@ class ResumeAnalysis(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-class MagicLinkRequest(BaseModel):
+class OtpRequest(BaseModel):
     email: EmailStr
 
 
-class MagicLinkVerify(BaseModel):
-    token: str
+class OtpVerify(BaseModel):
+    email: EmailStr
+    otp_code: str
 
 
 class ResumeTextRequest(BaseModel):
@@ -116,6 +129,51 @@ class ResumeTextRequest(BaseModel):
 # -------------------------------------------------
 # HELPERS
 # -------------------------------------------------
+def generate_otp(length: int = OTP_LENGTH) -> str:
+    """Generate a random numeric OTP."""
+    return ''.join(random.choices(string.digits, k=length))
+
+
+async def send_otp_email(email: str, otp_code: str) -> bool:
+    """Send OTP email using Brevo API."""
+    try:
+        email_api = TransactionalEmailsApi(brevo_api_client)
+        
+        email_message = SendSmtpEmail(
+            to=[{"email": email}],
+            sender={"email": os.environ["BREVO_SENDER_EMAIL"], "name": "ResumeAI"},
+            subject="Your ResumeAI OTP Code",
+            html_content=f"""
+            <html>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #00DC82;">ResumeAI Login</h2>
+                        <p>Your One-Time Password (OTP) for ResumeAI login is:</p>
+                        <div style="background-color: #f0f0f0; padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px;">
+                            <h1 style="color: #00DC82; letter-spacing: 5px; margin: 0;">{otp_code}</h1>
+                        </div>
+                        <p><strong>This code will expire in {OTP_EXPIRY_SECONDS // 60} minutes.</strong></p>
+                        <p style="color: #666; font-size: 12px;">
+                            If you didn't request this code, please ignore this email. Your account is safe.
+                        </p>
+                    </div>
+                </body>
+            </html>
+            """,
+            text_content=f"Your ResumeAI OTP code is: {otp_code}. This code will expire in {OTP_EXPIRY_SECONDS // 60} minutes."
+        )
+        
+        response = email_api.send_transac_email(email_message)
+        logger.info(f"[OTP] Email sent successfully to {email}")
+        return True
+    except ApiException as e:
+        logger.error(f"[OTP] Brevo API error: {str(e)}")
+        return False
+    except Exception as e:
+        logger.error(f"[OTP] Failed to send email to {email}: {str(e)}")
+        return False
+
+
 async def get_user_by_email(email: str):
     return await db.users.find_one({"email": email}, {"_id": 0})
 
@@ -374,44 +432,57 @@ RESUME TO ANALYZE
 # -------------------------------------------------
 # AUTH ROUTES
 # -------------------------------------------------
-@api_router.post("/auth/magic-link")
-async def magic_link(req: MagicLinkRequest):
+@api_router.post("/auth/send-otp")
+async def send_otp(req: OtpRequest):
     try:
-        token = secrets.token_urlsafe(32)
-        expiry = datetime.now(timezone.utc) + timedelta(seconds=MAGIC_LINK_EXPIRY)
+        # Generate OTP
+        otp_code = generate_otp()
+        expiry = datetime.now(timezone.utc) + timedelta(seconds=OTP_EXPIRY_SECONDS)
 
+        # Get or create user
         user = await get_user_by_email(req.email)
         if not user:
             await db.users.insert_one(
                 User(
                     email=req.email,
-                    magic_link_token=token,
-                    magic_link_expiry=expiry,
-                ).dict()
+                    otp_code=otp_code,
+                    otp_expiry=expiry,
+                ).model_dump(mode="json")
             )
         else:
             await db.users.update_one(
                 {"email": req.email},
-                {"$set": {"magic_link_token": token, "magic_link_expiry": expiry}},
+                {"$set": {"otp_code": otp_code, "otp_expiry": expiry}},
             )
 
-        logger.info(f"[AUTH] Magic link generated for {req.email}")
-        return {"token": token, "email": req.email, "message": "Magic link generated successfully"}
+        # Send OTP email
+        email_sent = await send_otp_email(req.email, otp_code)
+        if not email_sent:
+            raise HTTPException(status_code=500, detail="Failed to send OTP email")
+
+        logger.info(f"[AUTH] OTP sent to {req.email}")
+        return {"email": req.email, "message": "OTP sent successfully"}
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"[AUTH] Magic link error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to generate magic link")
+        logger.error(f"[AUTH] OTP sending error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to send OTP")
 
 
-@api_router.post("/auth/verify")
-async def verify(req: MagicLinkVerify):
+@api_router.post("/auth/verify-otp")
+async def verify_otp(req: OtpVerify):
     try:
-        user = await db.users.find_one({"magic_link_token": req.token})
+        user = await db.users.find_one({"email": req.email})
         if not user:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise HTTPException(status_code=401, detail="User not found")
         
-        # Check if token has expired
-        if user.get("magic_link_expiry"):
-            expiry_time = user["magic_link_expiry"]
+        # Check if OTP code matches
+        if user.get("otp_code") != req.otp_code:
+            raise HTTPException(status_code=401, detail="Invalid OTP code")
+        
+        # Check if OTP has expired
+        if user.get("otp_expiry"):
+            expiry_time = user["otp_expiry"]
             
             # Make sure expiry_time is timezone-aware
             if isinstance(expiry_time, str):
@@ -420,12 +491,12 @@ async def verify(req: MagicLinkVerify):
                 expiry_time = expiry_time.replace(tzinfo=timezone.utc)
             
             if datetime.now(timezone.utc) > expiry_time:
-                raise HTTPException(status_code=401, detail="Token expired")
+                raise HTTPException(status_code=401, detail="OTP expired")
 
         user_id = user.get("id", str(user.get("_id", "")))
         await db.users.update_one(
             {"id": user_id},
-            {"$set": {"magic_link_token": None, "magic_link_expiry": None}},
+            {"$set": {"otp_code": None, "otp_expiry": None}},
         )
 
         logger.info(f"[AUTH] User verified: {user['email']}")
@@ -438,8 +509,8 @@ async def verify(req: MagicLinkVerify):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"[AUTH] Verification error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Verification failed")
+        logger.error(f"[AUTH] OTP verification error: {str(e)}")
+        raise HTTPException(status_code=500, detail="OTP verification failed")
 
 
 # -------------------------------------------------
